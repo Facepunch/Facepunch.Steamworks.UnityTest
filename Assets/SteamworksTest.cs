@@ -32,6 +32,7 @@ public class SteamworksTest : MonoBehaviour
 
 		Tests["Friends"] = () => FriendTests();
 		Tests["PlayedWithFriends"] = () => PlayedWithFriends();
+		Tests["RandomFriends"] = () => RandomPeopleInformation();
 		Tests["AppTest"] = () => AppTest();
 		Tests["AchievementsTest"] = () => AchievementsTest();
 		Tests["StatsTest"] = () => StatsTest();
@@ -39,13 +40,13 @@ public class SteamworksTest : MonoBehaviour
 
 		foreach( var t in Tests )
 		{
-			AddButton( t.Key, () =>
+			AddButton( t.Key, async () =>
 			{
 				Print( "" );
 				Print( $"Running \"{t.Key}\"" );
 				Print( "" );
 
-				t.Value();
+				await t.Value();
 
 				Print( "" );
 				Print( $"Done" );
@@ -57,6 +58,7 @@ public class SteamworksTest : MonoBehaviour
 
 		SteamInventory.OnDefinitionsUpdated += () => Print( "SteamInventory.OnDefinitionsUpdated", "#ffff00" );
 		SteamInventory.OnInventoryUpdated += ( x ) => Print( $"SteamInventory.OnInventoryUpdated( {x} )", "#ffff00" );
+		SteamFriends.OnPersonaStateChange += ( x ) => Print( $"SteamInventory.OnPersonaStateChange( {x} )", "#ffff00" );
 
 		Print( $"Hello {SteamClient.Name} [{SteamClient.SteamId.Value}]" );
 		Print( "" );
@@ -135,52 +137,57 @@ public class SteamworksTest : MonoBehaviour
 		Print( $"All Tests Complete." );
 	}
 
-	public async Task FriendTests( int delay = 10 )
+	public async Task FriendTests()
 	{
 		foreach ( Friend friend in SteamFriends.GetFriends() )
 		{
-			await Task.Delay( delay );
-
 			Print( $"Friend: {friend.Name}\n{string.Join( ", ", friend.NameHistory )}" );
 			Print( $"{friend.Relationship} / {friend.SteamLevel} / {friend.IsPlayingThisGame} / {friend.IsOnline} / {friend.Id} " );
 
 			Image? avatar = await friend.GetSmallAvatarAsync();
 
-			if ( avatar.HasValue )
-			{
-				Print( $"GOT AVATAR ({avatar.Value})" );
-				DrawImage( avatar.Value );
-			}
-			else
-			{
-				Print( "GET AVATAR FAILED" );
-			}
+			DrawImage( await friend.GetSmallAvatarAsync() );
+			DrawImage( await friend.GetMediumAvatarAsync() );
+			DrawImage( await friend.GetLargeAvatarAsync() );
 
 			Print();
+
+			await Task.Delay( 1 );
 		}
 	}
-	public async Task PlayedWithFriends( int delay = 10 )
+	public async Task PlayedWithFriends()
 	{
 		foreach ( Friend friend in SteamFriends.GetPlayedWith() )
 		{
-			await Task.Delay( delay );
+			await friend.RequestInfoAsync();
 
 			Print( $"Friend: {friend.Name}\n{string.Join( ", ", friend.NameHistory )}" );
 			Print( $"{friend.Relationship} / {friend.SteamLevel} / {friend.IsPlayingThisGame} / {friend.IsOnline} / {friend.Id} " );
 
-			Image? avatar = await friend.GetSmallAvatarAsync();
+			DrawImage( await friend.GetSmallAvatarAsync() );
+			DrawImage( await friend.GetMediumAvatarAsync() );
+			DrawImage( await friend.GetLargeAvatarAsync() );
 
-			if ( avatar.HasValue )
-			{
-				Print( $"GOT AVATAR ({avatar.Value})" );
-				DrawImage( avatar.Value );
-			}
-			else
-			{
-				Print( "GET AVATAR FAILED" );
-			}
+			await Task.Delay( 1 );
+		}
+	}
 
-			Print();
+	public async Task RandomPeopleInformation()
+	{
+		for( int i=0; i<10; i++ )
+		{
+			var friend = new Friend( 76561197960279927 + (ulong)UnityEngine.Random.Range( 0, 5000000 ) );
+
+			await friend.RequestInfoAsync();
+
+			Print( $"Friend: {friend.Name}\n{string.Join( ", ", friend.NameHistory )}" );
+			Print( $"{friend.Relationship} / {friend.SteamLevel} / {friend.IsPlayingThisGame} / {friend.IsOnline} / {friend.Id} " );
+
+			DrawImage( await friend.GetSmallAvatarAsync() );
+			DrawImage( await friend.GetMediumAvatarAsync() );
+			DrawImage( await friend.GetLargeAvatarAsync() );
+
+			await Task.Delay( 1 );
 		}
 	}
 
@@ -193,7 +200,7 @@ public class SteamworksTest : MonoBehaviour
 		steamImage++;
 	}
 
-	public async Task AppTest( int delay = 100 )
+	public async Task AppTest()
 	{
 		Print( $"SteamApps.AppOwner: {SteamApps.AppOwner}" );
 		Print( $"SteamApps.AvailablLanguages: {string.Join( ", ", SteamApps.AvailablLanguages )}" );
@@ -212,7 +219,7 @@ public class SteamworksTest : MonoBehaviour
 		Print( $"SteamApps.InstalledDepots: {string.Join( ", ", SteamApps.InstalledDepots() )}" );
 	}
 
-	public async Task AchievementsTest( int delay = 100 )
+	public async Task AchievementsTest( int delay = 10 )
 	{
 		foreach ( Achievement a in SteamUserStats.Achievements )
 		{
@@ -223,13 +230,13 @@ public class SteamworksTest : MonoBehaviour
 			Print( $"	a.Description: {a.Description}" );
 			Print( $"	a.GlobalUnlocked:	{a.GlobalUnlocked}" );
 
-			DrawImage( a.GetIcon() );
+			DrawImage( await a.GetIconAsync() );
 
 			await Task.Delay( delay );
 		}
-	}
+	} 
 
-	public async Task StatsTest( int delay = 100 )
+	public async Task StatsTest( int delay = 10 )
 	{
 		int players = await SteamUserStats.PlayerCountAsync();
 		Print( $"current players: {players}" );
@@ -247,36 +254,19 @@ public class SteamworksTest : MonoBehaviour
 		{
 			Print( $"{DateTime.Now.AddDays( -i ).ToShortDateString()} : {history[i]} Deaths" );
 		}
-
-
 	}
 
 	public async Task InventoryTest( int delay = 100 )
 	{
-		SteamInventory.LoadItemDefinitions();
-
-		await Task.Delay( 1000 );
+		await SteamInventory.WaitForDefinitions();
 
 		InventoryResult? result = await SteamInventory.GetItems();
 		if ( result.HasValue )
 		{
 			foreach ( InventoryItem item in result.Value.GetItems() )
 			{
-				//	Print( $"{item.Id}" );
+				Print( $"{item.Id} {item.Def.Name}" );
 			}
 		}
-
-		await Task.Delay( 1000 );
-
-		result = await SteamInventory.GetItems();
-
-		await Task.Delay( 1000 );
-
-		result = await SteamInventory.GetItems();
-
-		await Task.Delay( 1000 );
-
-		result = await SteamInventory.GetItems();
-
 	}
 }

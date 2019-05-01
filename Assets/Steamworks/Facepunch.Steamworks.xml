@@ -47,7 +47,13 @@
         </member>
         <member name="M:Steamworks.Data.Achievement.GetIcon">
             <summary>
-            Gets the icon of the achievement
+            Gets the icon of the achievement. This can return a null image even though the image exists if the image
+            hasn't been downloaded by Steam yet. You can use GetIconAsync if you want to wait for the image to be downloaded.
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Achievement.GetIconAsync(System.Int32)">
+            <summary>
+            Gets the icon of the achievement, waits for it to load if we have to
             </summary>
         </member>
         <member name="P:Steamworks.Data.Achievement.GlobalUnlocked">
@@ -1130,6 +1136,11 @@
             Checks whether the current user's phone number is awaiting (re)verification.
             </summary>
         </member>
+        <member name="E:Steamworks.SteamUserStats.OnAchievementIconFetched">
+            <summary>
+            called when the achivement icon is loaded
+            </summary>
+        </member>
         <member name="E:Steamworks.SteamUserStats.OnUserStatsReceived">
             <summary>
             called when the latests stats and achievements have been received
@@ -1379,6 +1390,12 @@
         <member name="P:Steamworks.Friend.IsOnline">
             <summary>
             Returns true if this friend is online
+            </summary>
+        </member>
+        <member name="M:Steamworks.Friend.RequestInfoAsync(System.Int32)">
+            <summary>
+            Sometimes we don't know the user's name. This will wait until we have
+            downloaded the information on this user.
             </summary>
         </member>
         <member name="P:Steamworks.Friend.IsAway">
