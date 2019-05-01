@@ -14,8 +14,17 @@ public class SteamworksTest : MonoBehaviour
 	private readonly List<string> lines = new List<string>();
 	private readonly Dictionary<string, Func<Task>> Tests = new Dictionary<string, Func<Task>>();
 
+	private SteamImage[] steamImages;
+	private int steamImage;
+
 	private void Start()
 	{
+		//
+		// Log unhandled exceptions created in Async Tasks so we know when something has gone wrong
+		//
+		TaskScheduler.UnobservedTaskException += ( _, e ) => { Debug.LogException( e.Exception ); };
+
+		steamImages = GetComponentsInChildren<SteamImage>( true );
 
 		AddButton( "QUIT", () => Application.Quit() );
 
@@ -61,7 +70,7 @@ public class SteamworksTest : MonoBehaviour
 
 		go.GetComponentInChildren<UnityEngine.UI.Button>().onClick.AddListener( p );
 
-		go.transform.parent = ButtonCanvas.transform;
+		go.transform.SetParent( ButtonCanvas.transform, false );
 	}
 
 	public void Print( string str = "", string color = "" )
@@ -175,31 +184,13 @@ public class SteamworksTest : MonoBehaviour
 		}
 	}
 
-	public void DrawImage( Steamworks.Data.Image img )
+	public void DrawImage( Steamworks.Data.Image? img )
 	{
-		string grad = " .-:;+#@";
+		if ( !img.HasValue ) return;
 
-		for ( int y = 0; y < img.Height; y++ )
-		{
-			string str = "";
+		steamImages[steamImage % steamImages.Length].LoadTextureFromImage( img.Value );
 
-			for ( int x = 0; x < img.Width; x++ )
-			{
-				Steamworks.Data.Color p = img.GetPixel( x, y );
-
-				float brightness = 1 - ((float)(p.r + p.g + p.b) / (255.0f * 3.0f));
-				int c = (int)((grad.Length) * brightness);
-				if ( c > grad.Length - 1 )
-				{
-					c = grad.Length - 1;
-				}
-
-				str += grad[grad.Length - 1 - c];
-
-			}
-
-			Print( str );
-		}
+		steamImage++;
 	}
 
 	public async Task AppTest( int delay = 100 )
@@ -219,7 +210,6 @@ public class SteamworksTest : MonoBehaviour
 		Print( $"SteamApps.PurchaseTime: {SteamApps.PurchaseTime()}" );
 		Print( $"SteamApps.AppInstallDir: {SteamApps.AppInstallDir()}" );
 		Print( $"SteamApps.InstalledDepots: {string.Join( ", ", SteamApps.InstalledDepots() )}" );
-
 	}
 
 	public async Task AchievementsTest( int delay = 100 )
@@ -232,6 +222,8 @@ public class SteamworksTest : MonoBehaviour
 			Print( $"	a.Name: {a.Name}" );
 			Print( $"	a.Description: {a.Description}" );
 			Print( $"	a.GlobalUnlocked:	{a.GlobalUnlocked}" );
+
+			DrawImage( a.GetIcon() );
 
 			await Task.Delay( delay );
 		}
