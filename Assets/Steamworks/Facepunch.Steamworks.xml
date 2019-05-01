@@ -109,6 +109,129 @@
             Used to retrieve all leaderboard entries for friends of the current user
             </summary>
         </member>
+        <member name="M:Steamworks.Data.Lobby.Join">
+            <summary>
+            Try to join this room. Will return RoomEnter.Success on success,
+            and anything else is a failure
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Lobby.Leave">
+            <summary>
+            Leave a lobby; this will take effect immediately on the client side
+            other users in the lobby will be notified by a LobbyChatUpdate_t callback
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Lobby.InviteFriend(Steamworks.SteamId)">
+            <summary>
+            Invite another user to the lobby
+            will return true if the invite is successfully sent, whether or not the target responds
+            returns false if the local user is not connected to the Steam servers
+            </summary>
+        </member>
+        <member name="P:Steamworks.Data.Lobby.MemberCount">
+            <summary>
+            returns the number of users in the specified lobby
+            </summary>
+        </member>
+        <member name="P:Steamworks.Data.Lobby.Members">
+            <summary>
+            Returns current members. Need to be in the lobby to see the users.
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Lobby.GetData(System.String)">
+            <summary>
+            Get data associated with this lobby
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Lobby.SetData(System.String,System.String)">
+            <summary>
+            Get data associated with this lobby
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Lobby.DeleteData(System.String)">
+            <summary>
+            Removes a metadata key from the lobby
+            </summary>
+        </member>
+        <member name="P:Steamworks.Data.Lobby.Data">
+            <summary>
+            Get all data for this lobby
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Lobby.GetMemberData(Steamworks.Friend,System.String)">
+            <summary>
+            Gets per-user metadata for someone in this lobby
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Lobby.SetMemberData(Steamworks.Friend,System.String,System.String)">
+            <summary>
+            Sets per-user metadata (for the local user implicitly)
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Lobby.SendChatString(System.String)">
+            <summary>
+            Sends a string to the chat room
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Lobby.SendChatBytes(System.Byte[])">
+            <summary>
+            Sends bytes the the chat room
+            this isn't exposed because there's no way to read raw bytes atm, 
+            and I figure people can send json if they want something more advanced
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Lobby.Refresh">
+            <summary>
+            Refreshes metadata for a lobby you're not necessarily in right now
+            you never do this for lobbies you're a member of, only if your
+            this will send down all the metadata associated with a lobby
+            this is an asynchronous call
+            returns false if the local user is not connected to the Steam servers
+            results will be returned by a LobbyDataUpdate_t callback
+            if the specified lobby doesn't exist, LobbyDataUpdate_t::m_bSuccess will be set to false
+            </summary>
+        </member>
+        <member name="P:Steamworks.Data.Lobby.MaxMembers">
+            <summary>
+            Max members able to join this lobby. Cannot be over 250.
+            Can only be set by the owner
+            </summary>
+        </member>
+        <member name="P:Steamworks.Data.Lobby.Owner">
+            <summary>
+            You must be the lobby owner to set the owner
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.LobbyQuery.FilterDistanceClose">
+            <summary>
+            only lobbies in the same immediate region will be returned
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.LobbyQuery.FilterDistanceFar">
+            <summary>
+            only lobbies in the same immediate region will be returned
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.LobbyQuery.FilterDistanceWorldwide">
+            <summary>
+            only lobbies in the same immediate region will be returned
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.LobbyQuery.WithSlotsAvailable(System.Int32)">
+            <summary>
+            returns only lobbies with the specified number of slots available
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.LobbyQuery.WithMaxResults(System.Int32)">
+            <summary>
+            sets how many results to return, the lower the count the faster it is to download the lobby results
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.LobbyQuery.RequestAsync">
+            <summary>
+            Run the query, get the matching lobbies
+            </summary>
+        </member>
         <member name="T:Steamworks.Data.OutgoingPacket">
             <summary>
             A server query packet.
@@ -562,9 +685,67 @@
             that a remote player is not pretending to have a different user's inventory.
             </summary>
         </member>
+        <member name="T:Steamworks.SteamMatchmaking">
+            <summary>
+            Functions for clients to access matchmaking services, favorites, and to operate on game lobbies
+            </summary>
+        </member>
+        <member name="E:Steamworks.SteamMatchmaking.OnLobbyInvite">
+            <summary>
+            Someone invited you to a lobby
+            </summary>
+        </member>
+        <member name="E:Steamworks.SteamMatchmaking.OnLobbyDataChanged">
+            <summary>
+            The lobby metadata has changed
+            </summary>
+        </member>
+        <member name="E:Steamworks.SteamMatchmaking.OnLobbyMemberDataChanged">
+            <summary>
+            The lobby member metadata has changed
+            </summary>
+        </member>
+        <member name="E:Steamworks.SteamMatchmaking.OnLobbyMemberJoined">
+            <summary>
+            The lobby member joined
+            </summary>
+        </member>
+        <member name="E:Steamworks.SteamMatchmaking.OnLobbyMemberLeave">
+            <summary>
+            The lobby member left the room
+            </summary>
+        </member>
+        <member name="E:Steamworks.SteamMatchmaking.OnLobbyMemberDisconnected">
+            <summary>
+            The lobby member left the room
+            </summary>
+        </member>
+        <member name="E:Steamworks.SteamMatchmaking.OnLobbyMemberKicked">
+            <summary>
+            The lobby member was kicked. The 3rd param is the user that kicked them.
+            </summary>
+        </member>
+        <member name="E:Steamworks.SteamMatchmaking.OnLobbyMemberBanned">
+            <summary>
+            The lobby member was banned. The 3rd param is the user that banned them.
+            </summary>
+        </member>
+        <member name="E:Steamworks.SteamMatchmaking.OnChatMessage">
+            <summary>
+            A chat message was recieved from a member of a lobby
+            </summary>
+        </member>
+        <member name="M:Steamworks.SteamMatchmaking.CreateLobbyAsync(System.Int32)">
+            <summary>
+            Creates a new invisible lobby. Call lobby.SetPublic to take it online.
+            </summary>
+        </member>
         <member name="T:Steamworks.SteamMusic">
             <summary>
-            Undocumented Parental Settings
+            Functions to control music playback in the steam client.
+            This gives games the opportunity to do things like pause the music or lower the volume, 
+            when an important cut scene is shown, and start playing afterwards.
+            Nothing uses Steam Music though so this can probably get fucked
             </summary>
         </member>
         <member name="E:Steamworks.SteamMusic.OnPlaybackChanged">

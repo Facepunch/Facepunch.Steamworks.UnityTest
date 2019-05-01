@@ -22,7 +22,7 @@ public class SteamworksTest : MonoBehaviour
 		//
 		// Log unhandled exceptions created in Async Tasks so we know when something has gone wrong
 		//
-		TaskScheduler.UnobservedTaskException += ( _, e ) => { Debug.LogException( e.Exception ); };
+		TaskScheduler.UnobservedTaskException += ( _, e ) => { Debug.LogException( e.Exception ); PrintError( e.Exception.Message ); PrintError( e.Exception.StackTrace ); };
 
 		steamImages = GetComponentsInChildren<SteamImage>( true );
 
@@ -37,6 +37,8 @@ public class SteamworksTest : MonoBehaviour
 		Tests["AchievementsTest"] = () => AchievementsTest();
 		Tests["StatsTest"] = () => StatsTest();
 		Tests["InventoryTest"] = () => InventoryTest();
+		Tests["LobbyList"] = () => LobbyList();
+		Tests["LobbyCreate"] = () => LobbyCreate();
 
 		foreach( var t in Tests )
 		{
@@ -59,6 +61,10 @@ public class SteamworksTest : MonoBehaviour
 		SteamInventory.OnDefinitionsUpdated += () => Print( "SteamInventory.OnDefinitionsUpdated", "#ffff00" );
 		SteamInventory.OnInventoryUpdated += ( x ) => Print( $"SteamInventory.OnInventoryUpdated( {x} )", "#ffff00" );
 		SteamFriends.OnPersonaStateChange += ( x ) => Print( $"SteamInventory.OnPersonaStateChange( {x} )", "#ffff00" );
+		SteamMatchmaking.OnChatMessage += ( lbby, member, message ) => Print( $"[{lbby}] {member}: {message}", "#ffff00" );
+		SteamMatchmaking.OnLobbyMemberJoined += ( lbby, member ) => Print( $"[{lbby}] {member} JOINED THE LOBBY", "#ffff00" );
+		SteamMatchmaking.OnLobbyMemberLeave += ( lbby, member ) => Print( $"[{lbby}] {member} LEAVES", "#ffff00" );
+		SteamMatchmaking.OnLobbyMemberDisconnected += ( lbby, member ) => Print( $"[{lbby}] {member} Has Disconnected", "#ffff00" );
 
 		Print( $"Hello {SteamClient.Name} [{SteamClient.SteamId.Value}]" );
 		Print( "" );
@@ -93,6 +99,8 @@ public class SteamworksTest : MonoBehaviour
 
 		Text.text = string.Join( "\n", lines );
 	}
+
+	public void PrintError( string msg ) => Print( msg, "#ff0000" );
 
 	private void OnApplicationQuit()
 	{
@@ -258,7 +266,12 @@ public class SteamworksTest : MonoBehaviour
 
 	public async Task InventoryTest( int delay = 100 )
 	{
-		await SteamInventory.WaitForDefinitions();
+		var gotDefinitions = await SteamInventory.WaitForDefinitions();
+		if ( !gotDefinitions )
+		{
+			PrintError( "Couldn't load (WaitForDefinitions returned false)" );
+			return;
+		}
 
 		InventoryResult? result = await SteamInventory.GetItems();
 		if ( result.HasValue )
@@ -268,5 +281,54 @@ public class SteamworksTest : MonoBehaviour
 				Print( $"{item.Id} {item.Def.Name}" );
 			}
 		}
+	}
+
+	public async Task LobbyList( int delay = 100 )
+	{
+		var list = await SteamMatchmaking.LobbyList
+								.FilterDistanceWorldwide()
+								.RequestAsync();
+
+		if ( list == null )
+		{
+			PrintError( "No Lobbies Found!" );
+			return;
+		}
+
+		foreach ( var lobby in list )
+		{
+			Print( $"[{lobby.Id}] owned by {lobby.Owner} ({lobby.MemberCount}/{lobby.MaxMembers})" );
+		}
+	}
+
+	public async Task LobbyCreate( int delay = 100 )
+	{
+		var lobbyr = await SteamMatchmaking.CreateLobbyAsync( 32 );
+		if ( !lobbyr.HasValue )
+		{
+			PrintError( "Couldn't Create!" );
+			return;
+		}
+
+		var lobby = lobbyr.Value;
+		lobby.SetPublic();
+		lobby.SetData( "gametype", "sausage" );
+		lobby.SetData( "dicks", "unlicked" );
+
+		Print( $"lobby: {lobby.Id}" );
+
+		foreach ( var entry in lobby.Data )
+		{
+			Print( $" - {entry.Key} {entry.Value}" );
+		}
+
+		Print( $"members: {lobby.MemberCount}/{lobby.MaxMembers}" );
+
+		Print( $"Owner: {lobby.Owner}" );
+		Print( $"Owner Is Local Player: {lobby.Owner.IsMe}" );
+
+		lobby.SendChatString( "Hello I Love Lobbies" );
+
+		await Task.Delay( 1000 );
 	}
 }
