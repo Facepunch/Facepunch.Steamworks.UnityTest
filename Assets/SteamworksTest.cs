@@ -256,7 +256,7 @@ public class SteamworksTest : MonoBehaviour
 
 		Print( $"Rust has globally had {deaths.GetGlobalInt()} deaths" );
 
-		long[] history = await deaths.GetGlobalIntDays( 20 );
+		long[] history = await deaths.GetGlobalIntDaysAsync( 20 );
 
 		for ( int i = 0; i < history.Length; i++ )
 		{
@@ -273,7 +273,7 @@ public class SteamworksTest : MonoBehaviour
 			return;
 		}
 
-		InventoryResult? result = await SteamInventory.GetItems();
+		InventoryResult? result = await SteamInventory.GetAllItemsAsync();
 		if ( result.HasValue )
 		{
 			foreach ( InventoryItem item in result.Value.GetItems() )
