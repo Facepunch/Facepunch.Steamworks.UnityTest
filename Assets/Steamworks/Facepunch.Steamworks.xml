@@ -908,9 +908,16 @@
             After enabling this you will receive callbacks when ever the user receives a chat message.
             </summary>
         </member>
+        <member name="M:Steamworks.SteamInput.RunFrame">
+            <summary>
+            You shouldn't really need to call this because it get called by RunCallbacks on SteamClient
+            but Valve think it might be a nice idea if you call it right before you get input info -
+            just to make sure the info you're getting is 100% up to date.
+            </summary>
+        </member>
         <member name="P:Steamworks.SteamInput.Controllers">
             <summary>
-            Return a list of connected controllers. Will return null if none found.
+            Return a list of connected controllers.
             </summary>
         </member>
         <member name="T:Steamworks.SteamInventory">
@@ -2113,6 +2120,23 @@
         <member name="P:Steamworks.SteamVideo.NumViewers">
             <summary>
             If we're broadcasting, will return the number of live viewers
+            </summary>
+        </member>
+        <member name="P:Steamworks.Controller.ActionSet">
+            <summary>
+            Reconfigure the controller to use the specified action set (ie 'Menu', 'Walk' or 'Drive')
+            This is cheap, and can be safely called repeatedly. It's often easier to repeatedly call it in
+            our state loops, instead of trying to place it in all of your state transitions.
+            </summary>
+        </member>
+        <member name="M:Steamworks.Controller.GetDigitalState(System.String)">
+            <summary>
+            Returns the current state of the supplied digital game action
+            </summary>
+        </member>
+        <member name="M:Steamworks.Controller.GetAnalogState(System.String)">
+            <summary>
+            Returns the current state of these supplied analog game action
             </summary>
         </member>
         <member name="P:Steamworks.Friend.IsMe">
