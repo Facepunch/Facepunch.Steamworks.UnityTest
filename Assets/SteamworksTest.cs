@@ -56,7 +56,9 @@ public class SteamworksTest : MonoBehaviour
 			} );
 		}
 
+		Debug.Log( "Initializing Steam" );
 		SteamClient.Init( 252490 );
+		Debug.Log( "Done" );
 
 		SteamInventory.OnDefinitionsUpdated += () => Print( "SteamInventory.OnDefinitionsUpdated", "#ffff00" );
 		SteamInventory.OnInventoryUpdated += ( x ) => Print( $"SteamInventory.OnInventoryUpdated( {x} )", "#ffff00" );
@@ -66,8 +68,12 @@ public class SteamworksTest : MonoBehaviour
 		SteamMatchmaking.OnLobbyMemberLeave += ( lbby, member ) => Print( $"[{lbby}] {member} LEAVES", "#ffff00" );
 		SteamMatchmaking.OnLobbyMemberDisconnected += ( lbby, member ) => Print( $"[{lbby}] {member} Has Disconnected", "#ffff00" );
 
-		Print( $"Hello {SteamClient.Name} [{SteamClient.SteamId.Value}]" );
+		Debug.Log( "Printing Name and SteamId" );
+		Print( $"Hello {SteamClient.Name}" );
 		Print( "" );
+		Debug.Log( "Done" );
+		Print( $"Hello {SteamClient.SteamId}" );
+		Debug.Log( "Done" );
 	}
 
 	private void AddButton( string v, UnityEngine.Events.UnityAction p )
