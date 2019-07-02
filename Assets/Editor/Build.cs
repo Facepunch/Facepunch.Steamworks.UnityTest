@@ -25,7 +25,19 @@ public class BuildScript
 		string[] levels = new string[] { "Assets/Main.unity" };
 
 		// Build player.
-		BuildPipeline.BuildPlayer( levels, "L:/SteamworksTest", BuildTarget.StandaloneLinux64, BuildOptions.Development | BuildOptions.UncompressedAssetBundle );
+		BuildPipeline.BuildPlayer( levels, "L:/SteamworksTest64", BuildTarget.StandaloneLinux64, BuildOptions.Development | BuildOptions.UncompressedAssetBundle );
+	}
+
+	[MenuItem( "Build Tools/Build Linux 32" )]
+	public static void Linux32()
+	{
+		PlayerSettings.SetScriptingBackend( BuildTargetGroup.Standalone, ScriptingImplementation.Mono2x );
+
+		// Get filename.
+		string[] levels = new string[] { "Assets/Main.unity" };
+
+		// Build player.
+		BuildPipeline.BuildPlayer( levels, "L:/SteamworksTest32", BuildTarget.StandaloneLinux, BuildOptions.Development | BuildOptions.UncompressedAssetBundle );
 	}
 
 	[MenuItem( "Build Tools/Build Windows" )]
@@ -37,7 +49,19 @@ public class BuildScript
 		string[] levels = new string[] { "Assets/Main.unity" };
 
 		// Build player.
-		BuildPipeline.BuildPlayer( levels, "C:/temp/SteamworksTest/SteamworksTest.exe", BuildTarget.StandaloneWindows64, BuildOptions.Development | BuildOptions.UncompressedAssetBundle );
+		BuildPipeline.BuildPlayer( levels, "C:/temp/SteamworksTest64/SteamworksTest64.exe", BuildTarget.StandaloneWindows64, BuildOptions.Development | BuildOptions.UncompressedAssetBundle );
+	}
+
+	[MenuItem( "Build Tools/Build Windows 32" )]
+	public static void Windows32()
+	{
+		PlayerSettings.SetScriptingBackend( BuildTargetGroup.Standalone, ScriptingImplementation.Mono2x );
+
+		// Get filename.
+		string[] levels = new string[] { "Assets/Main.unity" };
+
+		// Build player.
+		BuildPipeline.BuildPlayer( levels, "C:/temp/SteamworksTest32/SteamworksTest32.exe", BuildTarget.StandaloneWindows, BuildOptions.Development | BuildOptions.UncompressedAssetBundle );
 	}
 
 	[MenuItem( "Build Tools/Build Windows IL2CPP" )]
@@ -61,7 +85,9 @@ public class BuildScript
 	{
 		Osx();
 		Linux();
+		Linux32();
 		Windows();
+		Windows32();
 		WindowsIL2CPP();
 	}
 }

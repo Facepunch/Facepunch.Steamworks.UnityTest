@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>Facepunch.Steamworks</name>
+        <name>Facepunch.Steamworks.Posix64</name>
     </assembly>
     <members>
         <member name="M:Steamworks.AuthTicket.Cancel">
@@ -382,9 +382,34 @@
             Can only be set by the owner
             </summary>
         </member>
+        <member name="M:Steamworks.Data.Lobby.SetGameServer(Steamworks.SteamId)">
+            <summary>
+            [SteamID variant]
+            Allows the owner to set the game server associated with the lobby. Triggers the 
+            Steammatchmaking.OnLobbyGameCreated event.
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Lobby.SetGameServer(System.String,System.UInt16)">
+            <summary>
+            [IP/Port variant]
+            Allows the owner to set the game server associated with the lobby. Triggers the 
+            Steammatchmaking.OnLobbyGameCreated event.
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Lobby.GetGameServer(System.UInt32@,System.UInt16@,Steamworks.SteamId@)">
+            <summary>
+            Gets the details of the lobby's game server, if set. Returns true if the lobby is 
+            valid and has a server set, otherwise returns false.
+            </summary>
+        </member>
         <member name="P:Steamworks.Data.Lobby.Owner">
             <summary>
             You must be the lobby owner to set the owner
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.Lobby.IsOwnedBy(Steamworks.SteamId)">
+            <summary>
+            Check if the specified SteamId owns the lobby
             </summary>
         </member>
         <member name="M:Steamworks.Data.LobbyQuery.FilterDistanceClose">
@@ -400,6 +425,42 @@
         <member name="M:Steamworks.Data.LobbyQuery.FilterDistanceWorldwide">
             <summary>
             only lobbies in the same immediate region will be returned
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.LobbyQuery.WithKeyValue(System.String,System.String)">
+            <summary>
+            Filter by specified key/value pair; string parameters
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.LobbyQuery.WithLower(System.String,System.Int32)">
+            <summary>
+            Numerical filter where value is less than the value provided
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.LobbyQuery.WithHigher(System.String,System.Int32)">
+            <summary>
+            Numerical filter where value is greater than the value provided
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.LobbyQuery.WithEqual(System.String,System.Int32)">
+            <summary>
+            Numerical filter where value must be equal to the value provided
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.LobbyQuery.WithNotEqual(System.String,System.Int32)">
+            <summary>
+            Numerical filter where value must not equal the value provided
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.LobbyQuery.AddNumericalFilter(System.String,System.Int32,Steamworks.LobbyComparison)">
+            <summary>
+            Test key, initialize numerical filter list if necessary, then add new numerical filter
+            </summary>
+        </member>
+        <member name="M:Steamworks.Data.LobbyQuery.OrderByNear(System.String,System.Int32)">
+            <summary>
+            Order filtered results according to key/values nearest the provided key/value pair.
+            Can specify multiple near value filters; each successive filter is lower priority than the previous.
             </summary>
         </member>
         <member name="M:Steamworks.Data.LobbyQuery.WithSlotsAvailable(System.Int32)">
@@ -788,6 +849,16 @@
             returns the appID of the current process
             </summary>
         </member>
+        <member name="M:Steamworks.SteamClient.RestartAppIfNecessary(System.UInt32)">
+            <summary>
+            Checks if your executable was launched through Steam and relaunches it through Steam if it wasn't
+             this returns true then it starts the Steam client if required and launches your game again through it, 
+             and you should quit your process as soon as possible. This effectively runs steam://run/AppId so it 
+             may not relaunch the exact executable that called it, as it will always relaunch from the version 
+             installed in your Steam library folder/
+             Note that during development, when not launching via Steam, this might always return true.
+            </summary>
+        </member>
         <member name="T:Steamworks.SteamFriends">
             <summary>
             Undocumented Parental Settings
@@ -1023,9 +1094,29 @@
             Functions for clients to access matchmaking services, favorites, and to operate on game lobbies
             </summary>
         </member>
+        <member name="P:Steamworks.SteamMatchmaking.MaxLobbyKeyLength">
+            <summary>
+            Maximum number of characters a lobby metadata key can be
+            </summary>
+        </member>
         <member name="E:Steamworks.SteamMatchmaking.OnLobbyInvite">
             <summary>
             Someone invited you to a lobby
+            </summary>
+        </member>
+        <member name="E:Steamworks.SteamMatchmaking.OnLobbyEntered">
+            <summary>
+            You joined a lobby
+            </summary>
+        </member>
+        <member name="E:Steamworks.SteamMatchmaking.OnLobbyCreated">
+            <summary>
+            You created a lobby
+            </summary>
+        </member>
+        <member name="E:Steamworks.SteamMatchmaking.OnLobbyGameCreated">
+            <summary>
+            A game server has been associated with the lobby
             </summary>
         </member>
         <member name="E:Steamworks.SteamMatchmaking.OnLobbyDataChanged">
@@ -1072,6 +1163,11 @@
             <summary>
             Creates a new invisible lobby. Call lobby.SetPublic to take it online.
             </summary>
+        </member>
+        <member name="M:Steamworks.SteamMatchmaking.JoinLobbyAsync(Steamworks.SteamId)">
+            <summmary>
+            Attempts to directly join the specified lobby
+            </summmary>
         </member>
         <member name="M:Steamworks.SteamMatchmaking.GetFavoriteServers">
             <summary>
@@ -1147,6 +1243,13 @@
         <member name="M:Steamworks.SteamNetworking.AcceptP2PSessionWithUser(Steamworks.SteamId)">
             <summary>
             This should be called in response to a OnP2PSessionRequest
+            </summary>
+        </member>
+        <member name="M:Steamworks.SteamNetworking.AllowP2PPacketRelay(System.Boolean)">
+            <summary>
+            Allow or disallow P2P connects to fall back on Steam server relay if direct 
+            connection or NAT traversal can't be established. Applies to connections 
+            created after setting or old connections that need to reconnect.
             </summary>
         </member>
         <member name="M:Steamworks.SteamNetworking.CloseP2PSessionWithUser(Steamworks.SteamId)">
@@ -1881,6 +1984,14 @@
             Get the available achievements
             </summary>
         </member>
+        <member name="M:Steamworks.SteamUserStats.IndicateAchievementProgress(System.String,System.Int32,System.Int32)">
+            <summary>
+            Show the user a pop-up notification with the current progress toward an achievement.
+            Will return false if RequestCurrentStats has not completed and successfully returned 
+            its callback, if the achievement doesn't exist/has unpublished changes in the app's 
+            Steamworks Admin page, or if the achievement is unlocked. 
+            </summary>
+        </member>
         <member name="M:Steamworks.SteamUserStats.PlayerCountAsync">
             <summary>
             Tries to get the number of players currently playing this game.
@@ -2570,6 +2681,16 @@
             Whether the developer of this app has specifically flagged this item as accepted in the Workshop
             </summary>
         </member>
+        <member name="P:Steamworks.Ugc.Item.VotesUp">
+            <summary>
+            The number of upvotes of this item
+            </summary>
+        </member>
+        <member name="P:Steamworks.Ugc.Item.VotesDown">
+            <summary>
+            The number of downvotes of this item
+            </summary>
+        </member>
         <member name="M:Steamworks.Ugc.Item.Download(System.Boolean)">
             <summary>
             Start downloading this item.
@@ -2579,6 +2700,16 @@
         <member name="M:Steamworks.Ugc.Item.HasTag(System.String)">
             <summary>
             A case insensitive check for tag
+            </summary>
+        </member>
+        <member name="M:Steamworks.Ugc.Item.Subscribe">
+            <summary>
+            Allows the user to subscribe to this item
+            </summary>
+        </member>
+        <member name="M:Steamworks.Ugc.Item.Unsubscribe">
+            <summary>
+            Allows the user to unsubscribe from this item
             </summary>
         </member>
         <member name="M:Steamworks.Ugc.Item.Vote(System.Boolean)">
