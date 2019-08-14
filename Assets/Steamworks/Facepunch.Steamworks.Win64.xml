@@ -2697,6 +2697,26 @@
             If this returns false the item isn#t getting downloaded.
             </summary>
         </member>
+        <member name="P:Steamworks.Ugc.Item.DownloadBytesTotal">
+            <summary>
+            If we're downloading, how big the total download is 
+            </summary>
+        </member>
+        <member name="P:Steamworks.Ugc.Item.DownloadBytesDownloaded">
+            <summary>
+            If we're downloading, how much we've downloaded
+            </summary>
+        </member>
+        <member name="P:Steamworks.Ugc.Item.SizeBytes">
+            <summary>
+            If we're installed, how big is the install
+            </summary>
+        </member>
+        <member name="P:Steamworks.Ugc.Item.DownloadAmount">
+            <summary>
+            If we're downloading our current progress as a delta betwen 0-1
+            </summary>
+        </member>
         <member name="M:Steamworks.Ugc.Item.HasTag(System.String)">
             <summary>
             A case insensitive check for tag
@@ -2785,6 +2805,12 @@
         <member name="M:Steamworks.Helpers.TakeBuffer(System.Int32)">
             <summary>
             Returns a StringBuilder. This will get returned and reused later on.
+            </summary>
+        </member>
+        <member name="T:Steamworks.PreserveAttribute">
+            <summary>
+            Prevent unity from stripping shit we depend on
+            https://docs.unity3d.com/Manual/ManagedCodeStripping.html
             </summary>
         </member>
     </members>
