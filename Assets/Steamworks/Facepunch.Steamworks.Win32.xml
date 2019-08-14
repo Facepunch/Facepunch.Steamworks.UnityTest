@@ -2797,14 +2797,9 @@
             Convert a DateTime to a unix time
             </summary>
         </member>
-        <member name="M:Steamworks.Helpers.TakeStringBuilder">
-            <summary>
-            Returns a StringBuilder. This will get returned and reused later on.
-            </summary>
-        </member>
         <member name="M:Steamworks.Helpers.TakeBuffer(System.Int32)">
             <summary>
-            Returns a StringBuilder. This will get returned and reused later on.
+            Returns a buffer. This will get returned and reused later on.
             </summary>
         </member>
         <member name="T:Steamworks.PreserveAttribute">
