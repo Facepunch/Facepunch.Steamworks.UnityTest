@@ -15,11 +15,16 @@ public partial class SteamworksTest
 
 		foreach ( var result in page.Value.Entries )
 		{
-			Print( $"Result: {result.Id}" );
-			Print( $"	{result.Title}" );
-			Print( $"	{result.Description.Replace( '\n', ' ' ).Replace( '\r', ' ' )}" );
-			Print( $"	IsInstalled: {result.IsInstalled}" );
+			Print( $"" );
+			Print( $"{result.Title}" );
+			Print( $"	     Id: {result.Id}" );
+			Print( $"	Instald: {result.IsInstalled}" );
 			Print( $"	Created: {result.Created}" );
+			Print( $"	Drectry: {result.Directory}" );
+			Print( $"	Favrtes: {result.NumFavorites}" );
+			Print( $"	Preview: {result.PreviewImageUrl}" );
+
+			await DrawImage( result.PreviewImageUrl );
 		}
 	}
 }

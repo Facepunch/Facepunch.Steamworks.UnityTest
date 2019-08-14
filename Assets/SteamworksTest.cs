@@ -215,6 +215,15 @@ public partial class SteamworksTest : MonoBehaviour
 		steamImage++;
 	}
 
+	public async Task DrawImage( string url )
+	{
+		var t = steamImages[steamImage % steamImages.Length].LoadTextureFromUrl( url );
+
+		steamImage++;
+
+		await t;
+	}
+
 	public async Task AppTest()
 	{
 		Print( $"SteamApps.AppOwner: {SteamApps.AppOwner}" );
