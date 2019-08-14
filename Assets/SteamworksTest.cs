@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class SteamworksTest : MonoBehaviour
+public partial class SteamworksTest : MonoBehaviour
 {
 	public GameObject ButtonPrefab;
 	public GameObject ButtonCanvas;
@@ -39,6 +39,7 @@ public class SteamworksTest : MonoBehaviour
 		Tests["InventoryTest"] = () => InventoryTest();
 		Tests["LobbyList"] = () => LobbyList();
 		Tests["LobbyCreate"] = () => LobbyCreate();
+		Tests["WorkshopList"] = () => WorkshopList();
 
 		foreach( var t in Tests )
 		{
