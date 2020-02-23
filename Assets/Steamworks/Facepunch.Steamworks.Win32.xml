@@ -4,6 +4,38 @@
         <name>Facepunch.Steamworks.Win32</name>
     </assembly>
     <members>
+        <member name="T:Steamworks.CallResult`1">
+            <summary>
+            An awaitable version of a SteamAPICall_t
+            </summary>
+        </member>
+        <member name="M:Steamworks.CallResult`1.OnCompleted(System.Action)">
+            <summary>
+            This gets called if IsComplete returned false on the first call.
+            The Action "continues" the async call. We pass it to the Dispatch
+            to be called when the callback returns.
+            </summary>
+        </member>
+        <member name="M:Steamworks.CallResult`1.GetResult">
+            <summary>
+            Gets the result. This is called internally by the async shit.
+            </summary>
+        </member>
+        <member name="P:Steamworks.CallResult`1.IsCompleted">
+            <summary>
+            Return true if complete or failed
+            </summary>
+        </member>
+        <member name="M:Steamworks.CallResult`1.GetAwaiter">
+            <summary>
+            This is what makes this struct awaitable
+            </summary>
+        </member>
+        <member name="T:Steamworks.ICallbackData">
+            <summary>
+            Gives us a generic way to get the CallbackId of structs
+            </summary>
+        </member>
         <member name="M:Steamworks.AuthTicket.Cancel">
             <summary>
             Cancels a ticket. 
@@ -25,6 +57,57 @@
             The connection has been closed remotely or disconnected locally. Check data.State for details.
             </summary>
         </member>
+        <member name="T:Steamworks.Dispatch">
+            <summary>
+            Manually pumps Steam's message queue and dispatches those
+            events to any waiting callbacks/callresults.
+            </summary>
+        </member>
+        <member name="M:Steamworks.Dispatch.Init">
+            <summary>
+            This gets called from Client/Server Init
+            It's important to switch to the manual dipatcher
+            </summary>
+        </member>
+        <member name="M:Steamworks.Dispatch.Frame(Steamworks.Data.HSteamPipe)">
+            <summary>
+            Calls RunFrame and processes events from this Steam Pipe
+            </summary>
+        </member>
+        <member name="M:Steamworks.Dispatch.ProcessCallback(Steamworks.Dispatch.CallbackMsg_t)">
+            <summary>
+            A callback is a general global message
+            </summary>
+        </member>
+        <member name="M:Steamworks.Dispatch.ProcessResult(Steamworks.Dispatch.CallbackMsg_t)">
+            <summary>
+            A result is a reply to a specific command
+            </summary>
+        </member>
+        <member name="M:Steamworks.Dispatch.LoopClientAsync">
+            <summary>
+            Pumps the queue in an async loop so we don't
+            have to think about it. This has the advantage that
+            you can call .Wait() on async shit and it still works.
+            </summary>
+        </member>
+        <member name="M:Steamworks.Dispatch.LoopServerAsync">
+            <summary>
+            Pumps the queue in an async loop so we don't
+            have to think about it. This has the advantage that
+            you can call .Wait() on async shit and it still works.
+            </summary>
+        </member>
+        <member name="M:Steamworks.Dispatch.OnCallComplete(Steamworks.Data.SteamAPICall_t,System.Action)">
+            <summary>
+            Watch for a steam api call
+            </summary>
+        </member>
+        <member name="M:Steamworks.Dispatch.Install``1(System.Action{``0},System.Boolean)">
+            <summary>
+            Install a global callback. The passed function will get called if it's all good.
+            </summary>
+        </member>
         <member name="M:Steamworks.SocketInterface.OnConnecting(Steamworks.Data.Connection,Steamworks.Data.ConnectionInfo)">
             <summary>
             Default behaviour is to accept every connection
@@ -39,101 +122,6 @@
             <summary>
             The connection has been closed remotely or disconnected locally. Check data.State for details.
             </summary>
-        </member>
-        <member name="T:Steamworks.Data.ConnectionState">
-            High level connection status
-        </member>
-        <member name="F:Steamworks.Data.ConnectionState.None">
-            Dummy value used to indicate an error condition in the API.
-            Specified connection doesn't exist or has already been closed.
-        </member>
-        <member name="F:Steamworks.Data.ConnectionState.Connecting">
-             We are trying to establish whether peers can talk to each other,
-             whether they WANT to talk to each other, perform basic auth,
-             and exchange crypt keys.
-            
-             - For connections on the "client" side (initiated locally):
-               We're in the process of trying to establish a connection.
-               Depending on the connection type, we might not know who they are.
-               Note that it is not possible to tell if we are waiting on the
-               network to complete handshake packets, or for the application layer
-               to accept the connection.
-            
-             - For connections on the "server" side (accepted through listen socket):
-               We have completed some basic handshake and the client has presented
-               some proof of identity.  The connection is ready to be accepted
-               using AcceptConnection().
-            
-             In either case, any unreliable packets sent now are almost certain
-             to be dropped.  Attempts to receive packets are guaranteed to fail.
-             You may send messages if the send mode allows for them to be queued.
-             but if you close the connection before the connection is actually
-             established, any queued messages will be discarded immediately.
-             (We will not attempt to flush the queue and confirm delivery to the
-             remote host, which ordinarily happens when a connection is closed.)
-        </member>
-        <member name="F:Steamworks.Data.ConnectionState.FindingRoute">
-            Some connection types use a back channel or trusted 3rd party
-            for earliest communication.  If the server accepts the connection,
-            then these connections switch into the rendezvous state.  During this
-            state, we still have not yet established an end-to-end route (through
-            the relay network), and so if you send any messages unreliable, they
-            are going to be discarded.
-        </member>
-        <member name="F:Steamworks.Data.ConnectionState.Connected">
-            We've received communications from our peer (and we know
-            who they are) and are all good.  If you close the connection now,
-            we will make our best effort to flush out any reliable sent data that
-            has not been acknowledged by the peer.  (But note that this happens
-            from within the application process, so unlike a TCP connection, you are
-            not totally handing it off to the operating system to deal with it.)
-        </member>
-        <member name="F:Steamworks.Data.ConnectionState.ClosedByPeer">
-             Connection has been closed by our peer, but not closed locally.
-             The connection still exists from an API perspective.  You must close the
-             handle to free up resources.  If there are any messages in the inbound queue,
-             you may retrieve them.  Otherwise, nothing may be done with the connection
-             except to close it.
-            
-             This stats is similar to CLOSE_WAIT in the TCP state machine.
-        </member>
-        <member name="F:Steamworks.Data.ConnectionState.ProblemDetectedLocally">
-             A disruption in the connection has been detected locally.  (E.g. timeout,
-             local internet connection disrupted, etc.)
-            
-             The connection still exists from an API perspective.  You must close the
-             handle to free up resources.
-            
-             Attempts to send further messages will fail.  Any remaining received messages
-             in the queue are available.
-        </member>
-        <member name="F:Steamworks.Data.ConnectionState.FinWait">
-            We've disconnected on our side, and from an API perspective the connection is closed.
-            No more data may be sent or received.  All reliable data has been flushed, or else
-            we've given up and discarded it.  We do not yet know for sure that the peer knows
-            the connection has been closed, however, so we're just hanging around so that if we do
-            get a packet from them, we can send them the appropriate packets so that they can
-            know why the connection was closed (and not have to rely on a timeout, which makes
-            it appear as if something is wrong).
-        </member>
-        <member name="F:Steamworks.Data.ConnectionState.Linger">
-             We've disconnected on our side, and from an API perspective the connection is closed.
-             No more data may be sent or received.  From a network perspective, however, on the wire,
-             we have not yet given any indication to the peer that the connection is closed.
-             We are in the process of flushing out the last bit of reliable data.  Once that is done,
-             we will inform the peer that the connection has been closed, and transition to the
-             FinWait state.
-            
-             Note that no indication is given to the remote host that we have closed the connection,
-             until the data has been flushed.  If the remote host attempts to send us data, we will
-             do whatever is necessary to keep the connection alive until it can be closed properly.
-             But in fact the data will be discarded, since there is no way for the application to
-             read it back.  Typically this is not a problem, as application protocols that utilize
-             the lingering functionality are designed for the remote host to wait for the response
-             before sending any more data.
-        </member>
-        <member name="F:Steamworks.Data.ConnectionState.Dead">
-            Connection is completely inactive and ready to be destroyed
         </member>
         <member name="F:Steamworks.Data.LeaderboardDisplay.Numeric">
             <summary>
@@ -619,6 +607,71 @@
             socket are closed ungracefully.
             </summary>
         </member>
+        <member name="M:Steamworks.ISteamInventory.GetResultStatus(Steamworks.Data.SteamInventoryResult_t)">
+            <summary>
+            Find out the status of an asynchronous inventory result handle.
+            </summary>
+        </member>
+        <member name="M:Steamworks.ISteamInventory.GetResultItems(Steamworks.Data.SteamInventoryResult_t,Steamworks.Data.SteamItemDetails_t[],System.UInt32@)">
+            <summary>
+            Copies the contents of a result set into a flat array. The specific contents of the result set depend on which query which was used.
+            </summary>
+        </member>
+        <member name="M:Steamworks.ISteamInventory.GetResultTimestamp(Steamworks.Data.SteamInventoryResult_t)">
+            <summary>
+            Returns the server time at which the result was generated. Compare against the value of IClientUtils::GetServerRealTime() to determine age.
+            </summary>
+        </member>
+        <member name="M:Steamworks.ISteamInventory.CheckResultSteamID(Steamworks.Data.SteamInventoryResult_t,Steamworks.SteamId)">
+            <summary>
+            Returns true if the result belongs to the target steam ID or false if the result does not. This is important when using DeserializeResult to verify that a remote player is not pretending to have a different users inventory.
+            </summary>
+        </member>
+        <member name="M:Steamworks.ISteamInventory.DestroyResult(Steamworks.Data.SteamInventoryResult_t)">
+            <summary>
+            Destroys a result handle and frees all associated memory.
+            </summary>
+        </member>
+        <member name="M:Steamworks.ISteamInventory.GetAllItems(Steamworks.Data.SteamInventoryResult_t@)">
+            <summary>
+            Captures the entire state of the current users Steam inventory.
+            </summary>
+        </member>
+        <member name="M:Steamworks.ISteamInventory.GetItemsByID(Steamworks.Data.SteamInventoryResult_t@,Steamworks.Data.InventoryItemId@,System.UInt32)">
+            <summary>
+            Captures the state of a subset of the current users Steam inventory identified by an array of item instance IDs.
+            </summary>
+        </member>
+        <member name="M:Steamworks.ISteamInventory.GrantPromoItems(Steamworks.Data.SteamInventoryResult_t@)">
+            <summary>
+            GrantPromoItems() checks the list of promotional items for which the user may be eligible and grants the items (one time only).
+            </summary>
+        </member>
+        <member name="M:Steamworks.ISteamInventory.ConsumeItem(Steamworks.Data.SteamInventoryResult_t@,Steamworks.Data.InventoryItemId,System.UInt32)">
+            <summary>
+            ConsumeItem() removes items from the inventory permanently.
+            </summary>
+        </member>
+        <member name="M:Steamworks.ISteamInventory.SendItemDropHeartbeat">
+            <summary>
+            Deprecated method. Playtime accounting is performed on the Steam servers.
+            </summary>
+        </member>
+        <member name="M:Steamworks.ISteamInventory.TriggerItemDrop(Steamworks.Data.SteamInventoryResult_t@,Steamworks.Data.InventoryDefId)">
+            <summary>
+            Playtime credit must be consumed and turned into item drops by your game.
+            </summary>
+        </member>
+        <member name="M:Steamworks.ISteamInventory.LoadItemDefinitions">
+            <summary>
+            LoadItemDefinitions triggers the automatic load and refresh of item definitions.
+            </summary>
+        </member>
+        <member name="M:Steamworks.ISteamUserStats.DownloadLeaderboardEntriesForUsers(Steamworks.Data.SteamLeaderboard_t,Steamworks.SteamId[],System.Int32)">
+            <summary>
+            Downloads leaderboard entries for an arbitrary set of users - ELeaderboardDataRequest is k_ELeaderboardDataRequestUsers
+            </summary>
+        </member>
         <member name="P:Steamworks.ServerList.Base.AppId">
             <summary>
             Which app we're querying. Defaults to the current app.
@@ -701,7 +754,7 @@
             This falls back to the Steam UI language if the user hasn't explicitly picked a language for the title.
             </summary>
         </member>
-        <member name="P:Steamworks.SteamApps.AvailablLanguages">
+        <member name="P:Steamworks.SteamApps.AvailableLanguages">
             <summary>
             Gets a list of the languages the current app supports.
             </summary>
@@ -813,6 +866,12 @@
             configuration on Steam.  Ask Valve for help with this.
             </summary>
         </member>
+        <member name="M:Steamworks.SteamClient.Init(System.UInt32,System.Boolean)">
+            <summary>
+            Initialize the steam client.
+            If asyncCallbacks is false you need to call RunCallbacks manually every frame.
+            </summary>
+        </member>
         <member name="P:Steamworks.SteamClient.IsLoggedOn">
             <summary>
             Checks if the current user's Steam client is connected to the Steam servers.
@@ -857,6 +916,11 @@
              may not relaunch the exact executable that called it, as it will always relaunch from the version 
              installed in your Steam library folder/
              Note that during development, when not launching via Steam, this might always return true.
+            </summary>
+        </member>
+        <member name="M:Steamworks.SteamClient.ValidCheck">
+            <summary>
+            Called in interfaces that rely on this being initialized
             </summary>
         </member>
         <member name="T:Steamworks.SteamFriends">
@@ -990,6 +1054,16 @@
             <summary>
             Return a list of connected controllers.
             </summary>
+        </member>
+        <member name="M:Steamworks.SteamInput.GetDigitalActionGlyph(Steamworks.Controller,System.String)">
+            <summary>
+            Return an absolute path to the PNG image glyph for the provided digital action name. The current
+            action set in use for the controller will be used for the lookup. You should cache the result and
+            maintain your own list of loaded PNG assets.
+            </summary>
+            <param name="controller"></param>
+            <param name="action"></param>
+            <returns></returns>
         </member>
         <member name="T:Steamworks.SteamInventory">
             <summary>
@@ -1179,6 +1253,11 @@
             Get a list of servers that you have added to your play history
             </summary>
         </member>
+        <member name="T:Steamworks.SteamMatchmakingServers">
+            <summary>
+            Functions for clients to access matchmaking services, favorites, and to operate on game lobbies
+            </summary>
+        </member>
         <member name="T:Steamworks.SteamMusic">
             <summary>
             Functions to control music playback in the steam client.
@@ -1270,7 +1349,24 @@
             Reads in a packet that has been sent from another user via SendP2PPacket..
             </summary>
         </member>
+        <member name="M:Steamworks.SteamNetworking.ReadP2PPacket(System.Byte[],System.UInt32@,Steamworks.SteamId@,System.Int32)">
+            <summary>
+            Reads in a packet that has been sent from another user via SendP2PPacket..
+            </summary>
+        </member>
+        <member name="M:Steamworks.SteamNetworking.ReadP2PPacket(System.Byte*,System.UInt32,System.UInt32@,Steamworks.SteamId@,System.Int32)">
+            <summary>
+            Reads in a packet that has been sent from another user via SendP2PPacket..
+            </summary>
+        </member>
         <member name="M:Steamworks.SteamNetworking.SendP2PPacket(Steamworks.SteamId,System.Byte[],System.Int32,System.Int32,Steamworks.P2PSend)">
+            <summary>
+            Sends a P2P packet to the specified user.
+            This is a session-less API which automatically establishes NAT-traversing or Steam relay server connections.
+            NOTE: The first packet send may be delayed as the NAT-traversal code runs.
+            </summary>
+        </member>
+        <member name="M:Steamworks.SteamNetworking.SendP2PPacket(Steamworks.SteamId,System.Byte*,System.UInt32,System.Int32,Steamworks.P2PSend)">
             <summary>
             Sends a P2P packet to the specified user.
             This is a session-less API which automatically establishes NAT-traversing or Steam relay server connections.
@@ -1302,6 +1398,30 @@
             <summary>
             Undocumented Parental Settings
             </summary>
+        </member>
+        <member name="M:Steamworks.SteamNetworkingUtils.InitRelayNetworkAccess">
+             <summary>
+             If you know that you are going to be using the relay network (for example,
+             because you anticipate making P2P connections), call this to initialize the
+             relay network.  If you do not call this, the initialization will
+             be delayed until the first time you use a feature that requires access
+             to the relay network, which will delay that first access.
+            
+             You can also call this to force a retry if the previous attempt has failed.
+             Performing any action that requires access to the relay network will also
+             trigger a retry, and so calling this function is never strictly necessary,
+             but it can be useful to call it a program launch time, if access to the
+             relay network is anticipated.
+            
+             Use GetRelayNetworkStatus or listen for SteamRelayNetworkStatus_t
+             callbacks to know when initialization has completed.
+             Typically initialization completes in a few seconds.
+            
+             Note: dedicated servers hosted in known data centers do *not* need
+             to call this, since they do not make routing decisions.  However, if
+             the dedicated server will be using P2P functionality, it will act as
+             a "client" and this should be called.
+             </summary>
         </member>
         <member name="P:Steamworks.SteamNetworkingUtils.LocalPingLocation">
              <summary>
@@ -1497,7 +1617,7 @@
         <member name="E:Steamworks.SteamScreenshots.OnScreenshotRequested">
             <summary>
             A screenshot has been requested by the user from the Steam screenshot hotkey. 
-            This will only be called if HookScreenshots has been enabled, in which case Steam 
+            This will only be called if Hooked is true, in which case Steam 
             will not take the screenshot itself.
             </summary>
         </member>
@@ -1564,6 +1684,12 @@
         <member name="E:Steamworks.SteamServer.OnSteamServersDisconnected">
             <summary>
             Disconnected from Steam
+            </summary>
+        </member>
+        <member name="M:Steamworks.SteamServer.Init(Steamworks.AppId,Steamworks.SteamServerInit,System.Boolean)">
+            <summary>
+            Initialize the steam server.
+            If asyncCallbacks is false you need to call RunCallbacks manually every frame.
             </summary>
         </member>
         <member name="M:Steamworks.SteamServer.RunCallbacks">
@@ -1714,6 +1840,11 @@
             We have received a server query on our game port. Pass it to Steam to handle.
             </summary>
         </member>
+        <member name="M:Steamworks.SteamServer.UserHasLicenseForApp(Steamworks.SteamId,Steamworks.AppId)">
+            <summary>
+            Does the user own this app (which could be DLC)
+            </summary>
+        </member>
         <member name="M:Steamworks.SteamServerStats.RequestUserStats(Steamworks.SteamId)">
             <summary>
             Downloads stats for the user
@@ -1775,6 +1906,11 @@
             <summary>
             Functions for accessing and manipulating Steam user information.
             This is also where the APIs for Steam Voice are exposed.
+            </summary>
+        </member>
+        <member name="E:Steamworks.SteamUGC.OnDownloadItemResult">
+            <summary>
+            Posted after Download call
             </summary>
         </member>
         <member name="M:Steamworks.SteamUGC.QueryFileAsync(Steamworks.Data.PublishedFileId)">
@@ -1940,6 +2076,7 @@
             Requests an application ticket encrypted with the secret "encrypted app ticket key".
             The encryption key can be obtained from the Encrypted App Ticket Key page on the App Admin for your app.
             There can only be one call pending, and this call is subject to a 60 second rate limit.
+            If you get a null result from this it's probably because you're calling it too often.
             This can fail if you don't have an encrypted ticket set for your app here https://partner.steamgames.com/apps/sdkauth/
             </summary>
         </member>
@@ -2017,6 +2154,16 @@
             Only after the resulting callback comes back can you start calling the rest of the stats 
             and achievement functions for the current user.
             </summary>
+        </member>
+        <member name="M:Steamworks.SteamUserStats.RequestGlobalStats(System.Int32)">
+            <summary>
+            Asynchronously fetches global stats data, which is available for stats marked as 
+            "aggregated" in the App Admin panel of the Steamworks website.
+            You must have called RequestCurrentStats and it needs to return successfully via 
+            its callback prior to calling this.
+            </summary>
+            <param name="days">How many days of day-by-day history to retrieve in addition to the overall totals. The limit is 60.</param>
+            <returns>OK indicates success, InvalidState means you need to call RequestCurrentStats first, Fail means the remote call failed</returns>
         </member>
         <member name="M:Steamworks.SteamUserStats.FindOrCreateLeaderboardAsync(System.String,Steamworks.Data.LeaderboardSort,Steamworks.Data.LeaderboardDisplay)">
             <summary>
@@ -2727,14 +2874,36 @@
             Allows the user to subscribe to this item
             </summary>
         </member>
+        <member name="M:Steamworks.Ugc.Item.SubscribeDownloadAsync(System.Action{System.Single},System.Threading.CancellationToken,System.Int32)">
+            <summary>
+            Allows the user to subscribe to this item and wait for it to be downloaded
+            If CancellationToken is default then there is 60 seconds timeout
+            Progress will be set to 0-1
+            </summary>
+        </member>
         <member name="M:Steamworks.Ugc.Item.Unsubscribe">
             <summary>
             Allows the user to unsubscribe from this item
             </summary>
         </member>
+        <member name="M:Steamworks.Ugc.Item.AddFavorite">
+            <summary>
+            Adds item to user favorite list
+            </summary>
+        </member>
+        <member name="M:Steamworks.Ugc.Item.RemoveFavorite">
+            <summary>
+            Removes item from user favorite list
+            </summary>
+        </member>
         <member name="M:Steamworks.Ugc.Item.Vote(System.Boolean)">
             <summary>
             Allows the user to rate a workshop item up or down.
+            </summary>
+        </member>
+        <member name="M:Steamworks.Ugc.Item.GetUserVote">
+            <summary>
+            Gets the current users vote on the item
             </summary>
         </member>
         <member name="P:Steamworks.Ugc.Item.Url">

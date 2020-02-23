@@ -228,7 +228,7 @@ public partial class SteamworksTest : MonoBehaviour
 	public async Task AppTest()
 	{
 		Print( $"SteamApps.AppOwner: {SteamApps.AppOwner}" );
-		Print( $"SteamApps.AvailablLanguages: {string.Join( ", ", SteamApps.AvailablLanguages )}" );
+		Print( $"SteamApps.AvailablLanguages: {string.Join( ", ", SteamApps.AvailableLanguages )}" );
 		Print( $"SteamApps.BuildId: {SteamApps.BuildId}" );
 		Print( $"SteamApps.CommandLine: {SteamApps.CommandLine}" );
 		Print( $"SteamApps.CurrentBetaName: {SteamApps.CurrentBetaName}" );
