@@ -58,6 +58,12 @@ public partial class SteamworksTest : MonoBehaviour
 			} );
 		}
 
+		Dispatch.OnDebugCallback = ( type, content, server ) =>
+		{
+			Print( $"\nCallback \"{type}\"", "#ddd" );
+			Print( "\t" + content.Replace( "\n", "\n\t" ), "#bbb" );
+		};
+
 		Debug.Log( "Initializing Steam" );
 		SteamClient.Init( 252490 );
 		Debug.Log( "Done" );
