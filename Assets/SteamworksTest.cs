@@ -41,6 +41,8 @@ public partial class SteamworksTest : MonoBehaviour
 		Tests["LobbyCreate"] = () => LobbyCreate();
 		Tests["WorkshopList"] = () => WorkshopList();
 		Tests["WorkshopDownload"] = () => WorkshopDownload();
+		Tests["Leaderboards"] = () => Leaderboards();
+		Tests["Server"] = () => Server();
 
 		foreach( var t in Tests )
 		{

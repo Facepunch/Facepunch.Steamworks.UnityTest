@@ -98,7 +98,7 @@
             A callback is a general global message
             </summary>
         </member>
-        <member name="M:Steamworks.Dispatch.CallbackToString(Steamworks.Dispatch.CallbackMsg_t)">
+        <member name="M:Steamworks.Dispatch.CallbackToString(Steamworks.CallbackType,System.IntPtr,System.Int32)">
             <summary>
             Given a callback, try to turn it into a string
             </summary>
@@ -122,7 +122,7 @@
             you can call .Wait() on async shit and it still works.
             </summary>
         </member>
-        <member name="M:Steamworks.Dispatch.OnCallComplete(Steamworks.Data.SteamAPICall_t,System.Action,System.Boolean)">
+        <member name="M:Steamworks.Dispatch.OnCallComplete``1(Steamworks.Data.SteamAPICall_t,System.Action,System.Boolean)">
             <summary>
             Watch for a steam api call
             </summary>

@@ -14,7 +14,7 @@ public partial class SteamworksTest
 
 		var page = await q.GetPageAsync( 1 );
 
-		foreach ( var result in page.Value.Entries )
+		foreach ( var result in page.Value.Entries.Take( 5 ) )
 		{
 			Print( $"" );
 			Print( $"{result.Title}" );
