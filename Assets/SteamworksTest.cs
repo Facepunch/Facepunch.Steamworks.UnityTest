@@ -43,6 +43,7 @@ public partial class SteamworksTest : MonoBehaviour
 		Tests["WorkshopDownload"] = () => WorkshopDownload();
 		Tests["Leaderboards"] = () => Leaderboards();
 		Tests["Server"] = () => Server();
+		Tests["Overlay"] = () => OverlayTest();
 
 		foreach( var t in Tests )
 		{
@@ -308,6 +309,14 @@ public partial class SteamworksTest : MonoBehaviour
 		}
 	}
 
+	public async Task OverlayTest( int delay = 100 )
+	{
+		Print( $"SteamUtils.IsOverlayEnabled: {SteamUtils.IsOverlayEnabled}" );
+		Print( @"OpenWebOverlay( ""https://www.google.com/"" )" );
+
+		SteamFriends.OpenWebOverlay( "https://www.google.com/" );
+	}	
+	
 	public async Task LobbyList( int delay = 100 )
 	{
 		var list = await SteamMatchmaking.LobbyList
